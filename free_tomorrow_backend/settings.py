@@ -36,12 +36,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'api.apps.ApiConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -81,9 +83,9 @@ WSGI_APPLICATION = 'free_tomorrow_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'free_tomorrow_backend_development',
-        'USER': 'postgres',
-        'PASSWORD': 'free_tomorrow_backend_development',
+        'NAME': str(os.getenv('DB_NAME')),
+        'USER': str(os.getenv('PG_USER')),
+        'PASSWORD': str(os.getenv('PG_PASSWORD')),
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
