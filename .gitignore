@@ -1,3 +1,5 @@
 .env
 api/__pycache__
 free_tomorrow_backend/__pycache__
+.coverage
+htmlcov
