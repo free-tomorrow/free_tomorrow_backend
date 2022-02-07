@@ -1,1 +1,1 @@
-web: gunicorn free_tomorrow_backend.wsgi
+web: gunicorn free_tomorrow_backend.wsgib --log-file -
