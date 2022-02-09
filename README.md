@@ -72,7 +72,6 @@ Example response:
 POST /users/
 Content-Type: application/json
 Accept: application/json
-
 {
   "name": "Bob"
   "email": "bob@example.com"
@@ -143,7 +142,6 @@ Example response:
 POST /trips/
 Content-Type: application/json
 Accept: application/json
-
 {
     "name": "Disney",
     "created_by": "Bob",
