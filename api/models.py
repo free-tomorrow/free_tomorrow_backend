@@ -12,7 +12,14 @@ class Trip(models.Model):
     created_by = models.CharField(max_length=64)
     confirmed = models.BooleanField(default=False)
     budget = models.IntegerField()
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, through='TripUser')
 
     def __str__(self):
         return self.name
+
+class TripUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
+    start_date = models.PositiveIntegerField(default=None)
+    end_date = models.PositiveIntegerField(default=None)
+    budget = models.PositiveIntegerField(default=None)

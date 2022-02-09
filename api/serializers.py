@@ -1,11 +1,18 @@
 from asyncore import read
 from rest_framework import serializers
-from .models import User, Trip
+from .models import User, Trip, TripUser
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'email')
+
+class TripUserSerializer(serializers.ModelSerializer):
+    user = UserSerializer
+
+    class Meta:
+        model = TripUser
+        fields = ('budget', 'start_date', 'end_date', 'user')
 
 class TripSetSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=64)
@@ -22,7 +29,8 @@ class UserTripSerializer(serializers.ModelSerializer):
 
 class TripSerializer(serializers.ModelSerializer):
     users = UserSerializer(many = True, read_only = True)
+    trip_users = TripUserSerializer(many = True, read_only = True)
 
     class Meta:
         model = Trip
-        fields = ('id', 'name', 'created_by', 'budget', 'confirmed', 'users')
+        fields = ('id', 'name', 'created_by', 'budget', 'confirmed', 'users', 'trip_users')

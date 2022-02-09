@@ -101,7 +101,7 @@ class URLTests(TestCase):
     def test_post_trips(self):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
-        params = {'name': 'Trip', 'created_by': user.email, 'budget': 1}
+        params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'start_date': 1, 'end_date': 2, 'budget': 3}
 
         response = self.client.post('/trips/', params, 'application/json')
         data = response.data
