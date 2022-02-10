@@ -117,12 +117,12 @@ class URLTests(TestCase):
 
         self.assertEqual(user, trip_user)
 
-    def test_put_trip(self):
+    def test_patch_trip(self):
         trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
 
         params = {'name': 'Trip2', 'created_by': 'user', 'budget': 10}
 
-        response = self.client.put(f'/trips/{trip.id}/', params, 'application/json')
+        response = self.client.patch(f'/trips/{trip.id}/', params, 'application/json')
         data = response.data
 
         self.assertEqual(response.status_code, 200)
