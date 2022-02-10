@@ -101,8 +101,8 @@ class URLTests(TestCase):
     def test_post_trips(self):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
-        params = {'name': 'Trip', 'created_by': user.email, 'budget': 1}
-
+        params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'start_date': 1, 'end_date': 2, 'budget': 3}
+  
         response = self.client.post('/trips/', params, 'application/json')
         data = response.data
 
@@ -117,12 +117,12 @@ class URLTests(TestCase):
 
         self.assertEqual(user, trip_user)
 
-    def test_put_trip(self):
+    def test_patch_trip(self):
         trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
 
         params = {'name': 'Trip2', 'created_by': 'user', 'budget': 10}
 
-        response = self.client.put(f'/trips/{trip.id}/', params, 'application/json')
+        response = self.client.patch(f'/trips/{trip.id}/', params, 'application/json')
         data = response.data
 
         self.assertEqual(response.status_code, 200)
@@ -148,7 +148,7 @@ class URLTests(TestCase):
         response = self.client.get(f'/users/{trip.id}/')
 
         self.assertEqual(response.status_code, 404)
-
+        
     def test_post_session(self):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
