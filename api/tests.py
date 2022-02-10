@@ -102,7 +102,7 @@ class URLTests(TestCase):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
         params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'start_date': 1, 'end_date': 2, 'budget': 3}
-
+  
         response = self.client.post('/trips/', params, 'application/json')
         data = response.data
 
@@ -148,6 +148,27 @@ class URLTests(TestCase):
         response = self.client.get(f'/users/{trip.id}/')
 
         self.assertEqual(response.status_code, 404)
+        
+    def test_post_session(self):
+        user = User.objects.create(name='Sam', email='swd1@gmail.com')
+
+        params = {'email': 'swd1@gmail.com'}
+        response = self.client.post('/sessions/', params)
+        data = response.data
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['email'], 'swd1@gmail.com')
+        self.assertEqual(data['name'], 'Sam')
+
+    def test_post_session_wrong_email(self):
+        user = User.objects.create(name='Sam', email='swd1@gmail.com')
+
+        params = {'email': 'wrong@gmail.com'}
+        response = self.client.post('/sessions/', params)
+        data = response.data
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data['errors']['title'], 'user does not exist')
 
 class ModelTests(TestCase):
     def test_email_uniqueness(self):
