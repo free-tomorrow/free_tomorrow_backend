@@ -18,7 +18,7 @@ class TripSetSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=64)
     created_by = serializers.CharField(max_length=64)
     confirmed = serializers.BooleanField(default=False)
-    budget = serializers.IntegerField
+    budget = serializers.IntegerField()
 
 class UserTripSerializer(serializers.ModelSerializer):
     trip_set = TripSetSerializer(many = True)
