@@ -67,7 +67,7 @@ def trip_list(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PATCH', 'DELETE'])
 def trip_detail(request, pk):
     try:
         trip = Trip.objects.get(pk=pk)
@@ -78,7 +78,7 @@ def trip_detail(request, pk):
         serializer = TripSerializer(trip)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    elif request.method == 'PATCH':
         serializer = TripSerializer(trip, data=request.data)
         if serializer.is_valid():
             serializer.save()
