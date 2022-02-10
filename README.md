@@ -7,7 +7,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Heroku](https://img.shields.io/badge/Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white)
 
-#### BE Team: [Sam Devine](https://github.com/samueldevine), [Greg Fischer](https://github.com/GregoryJFischer) || FE Team: [Delilah Necrason](https://github.com/delilahrois), [Regan Losey](https://github.com/reganlosey)
+#### BE Team: [Sam Devine](https://github.com/samueldevine), [Greg Fischer](https://github.com/GregoryJFischer) || [FE](https://github.com/free-tomorrow/free-tomorrow) Team: [Delilah Necrason](https://github.com/delilahrois), [Regan Losey](https://github.com/reganlosey)
 
 -------------------------------------------------------------------------------
 
