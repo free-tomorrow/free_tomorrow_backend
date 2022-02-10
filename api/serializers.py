@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'email')
 
 class TripUserSerializer(serializers.ModelSerializer):
-    user = UserSerializer
+    user = UserSerializer()
 
     class Meta:
         model = TripUser
@@ -33,4 +33,4 @@ class TripSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Trip
-        fields = ('id', 'name', 'created_by', 'budget', 'confirmed', 'users', 'trip_users')
+        fields = ('id', 'name', 'created_by', 'budget', 'users', 'trip_users')
