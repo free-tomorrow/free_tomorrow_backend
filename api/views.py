@@ -88,3 +88,16 @@ def trip_detail(request, pk):
     elif request.method == 'DELETE':
         trip.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+def session_list(request):
+    try:
+        user = User.objects.get(email=request.data['email'])
+    except User.DoesNotExist:
+        return Response(
+            {'errors': {'title': 'user does not exist'}},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
