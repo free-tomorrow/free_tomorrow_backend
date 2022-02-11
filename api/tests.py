@@ -42,34 +42,6 @@ class URLTests(TestCase):
         self.assertEqual(data['email'], 'swd1@gmail.com')
         self.assertEqual(data['name'], 'Sam')
 
-    def test_put_user(self):
-        user = User.objects.create(name='Sam', email='swd1@gmail.com')
-
-        params = {"name": "Greg", "email": "gwhoisj@gmail.com"}
-
-        response = self.client.put(f'/users/{user.id}/', params, 'application/json')
-        data = response.data
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['email'], 'gwhoisj@gmail.com')
-        self.assertEqual(data['name'], 'Greg')
-
-        user = User.objects.get(pk=data['id'])
-
-        self.assertEqual(user.email, 'gwhoisj@gmail.com')
-        self.assertEqual(user.name, 'Greg')
-
-    def test_delete_user(self):
-        user = User.objects.create(name='Sam', email='swd1@gmail.com')
-
-        response = self.client.delete(f'/users/{user.id}/')
-
-        self.assertEqual(response.status_code, 204)
-
-        response = self.client.get(f'/users/{user.id}/')
-
-        self.assertEqual(response.status_code, 404)
-
     def test_get_trips(self):
         Trip.objects.create(name='Trip1', created_by='user1', budget=1)
         Trip.objects.create(name='Trip2', created_by='user1', budget=2)
@@ -101,8 +73,18 @@ class URLTests(TestCase):
     def test_post_trips(self):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
-        params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'start_date': 1, 'end_date': 2, 'budget': 3}
-  
+        params = {
+            'trip_info': {
+                'name': 'Trip',
+                'created_by': user.email,
+                'budget': 1
+                },
+            'dates': [
+                {'start_date': 1, 'end_date': 2},
+                {'start_date': 3, 'end_date': 4}
+                ]
+            }
+
         response = self.client.post('/trips/', params, 'application/json')
         data = response.data
 
@@ -111,6 +93,9 @@ class URLTests(TestCase):
         self.assertEqual(data['name'], 'Trip')
         self.assertEqual(data['created_by'], user.email)
         self.assertEqual(data['budget'], 1)
+
+        self.assertEqual(data['dates'][0]['start_date'], 1)
+        self.assertEqual(data['dates'][0]['end_date'], 2)
 
         trip = Trip.objects.get(pk=data['id'])
         trip_user = trip.users.first()
@@ -138,17 +123,6 @@ class URLTests(TestCase):
         self.assertEqual(data['created_by'], 'user')
         self.assertEqual(data['budget'], 10)
 
-    def test_delete_trip(self):
-        trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
-
-        response = self.client.delete(f'/trips/{trip.id}/')
-
-        self.assertEqual(response.status_code, 204)
-
-        response = self.client.get(f'/users/{trip.id}/')
-
-        self.assertEqual(response.status_code, 404)
-        
     def test_post_session(self):
         user = User.objects.create(name='Sam', email='swd1@gmail.com')
 
