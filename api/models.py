@@ -22,4 +22,3 @@ class TripUser(models.Model):
     trip = models.ForeignKey(Trip, on_delete=models.CASCADE)
     start_date = models.PositiveIntegerField(default=None)
     end_date = models.PositiveIntegerField(default=None)
-    budget = models.PositiveIntegerField(default=None)
