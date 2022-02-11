@@ -28,7 +28,7 @@ def user_detail(request, pk):
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'errors': {'title': 'user could not be found'}}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = UserTripSerializer(user)

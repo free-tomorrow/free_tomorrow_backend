@@ -25,7 +25,7 @@ class UserRequestTests(TestCase):
         self.assertEqual(response.data[1]['name'], 'test2')
         self.assertEqual(len(response.data), 2)
 
-    def test_get_user(self):
+    def test_get_user_success(self):
         user = self.create_user('test', 'test@example.com')
         response = self.client.get(reverse(views.user_detail, args=[user.id]))
         serializer = UserTripSerializer(user)
@@ -35,6 +35,12 @@ class UserRequestTests(TestCase):
 
         self.assertEqual(response.data['email'], user.email)
         self.assertEqual(response.data['name'], user.name)
+
+    def test_get_user_failure(self):
+        response = self.client.get(reverse(views.user_detail, args=[999]))
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, {'errors': {'title': 'user could not be found'}})
 
     def test_post_users_success(self):
         params = {'name': 'test', 'email': 'test@example.com'}
