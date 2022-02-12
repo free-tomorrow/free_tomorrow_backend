@@ -93,8 +93,6 @@ def trip_list(request):
             return Response(response_data, status=status.HTTP_201_CREATED)
         return Response({'errors': {'title': 'trip could not be created'}}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PATCH', 'DELETE'])
-
 @api_view(['GET', 'PATCH'])
 def trip_detail(request, pk):
     """ Get a single trip, or update an existing trip. """
