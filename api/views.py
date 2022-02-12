@@ -5,14 +5,39 @@ from rest_framework.decorators import api_view
 from .serializers import UserSerializer, UserTripSerializer, TripSerializer
 from .models import User, Trip, TripUser
 
+def unique_trips(data):
+    trips = data['trip_set']
+    data['trip_set'] = []
+
+    for trip in trips:
+        if trip not in data['trip_set']:
+            data['trip_set'].append(trip)
+
+    return data
+
+def unique_users(data):
+    users = data['users']
+    data['users'] = []
+
+    for user in users:
+        if user not in data['users']:
+            data['users'].append(user)
+
+    return data
+
 @api_view(['GET', 'POST'])
 def user_list(request):
-    """ List all users, or create a new user. """
+    """
+    List all code users, or create a new user.
+    """
 
     if request.method == 'GET':
         users = User.objects.all()
         serializer = UserTripSerializer(users, many=True)
-        return Response(serializer.data)
+        users = []
+        for user in serializer.data:
+            users.append(unique_trips(user))
+        return Response(users)
 
     elif request.method == 'POST':
         serializer = UserSerializer(data=request.data)
@@ -23,8 +48,9 @@ def user_list(request):
 
 @api_view(['GET'])
 def user_detail(request, pk):
-    """ Retrieve a single user. """
-
+    """
+    Retrieve, update or delete a user.
+    """
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -32,7 +58,7 @@ def user_detail(request, pk):
 
     if request.method == 'GET':
         serializer = UserTripSerializer(user)
-        return Response(serializer.data)
+        return Response(unique_trips(serializer.data))
 
 @api_view(['GET', 'POST'])
 def trip_list(request):
@@ -41,16 +67,33 @@ def trip_list(request):
     if request.method == 'GET':
         trips = Trip.objects.all()
         serializer = TripSerializer(trips, many=True)
-        return Response(serializer.data)
+        trips = []
+        for trip in serializer.data:
+            trips.append(unique_users(trip))
+        return Response(trips)
 
     elif request.method == 'POST':
         serializer = TripSerializer(data=request.data['trip_info'])
         if serializer.is_valid():
             user = User.objects.get(email=request.data['trip_info']['created_by'])
             trip = serializer.save()
-            TripUser.objects.create(user=user, trip=trip, budget=request.data['budget'], start_date = request.data['start_date'], end_date = request.data['end_date'])
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            for date in request.data['dates']:
+                TripUser.objects.create(user=user, trip=trip, start_date = date['start_date'], end_date = date['end_date'])
+
+            response_data = serializer.data
+
+            dates = []
+            for date in trip.tripuser_set.all():
+                dates.append({'start_date': date.start_date, 'end_date': date.end_date})
+            response_data['dates'] = dates
+
+            response_data = unique_users(response_data)
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response({'errors': {'title': 'trip could not be created'}}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PATCH', 'DELETE'])
 
 @api_view(['GET', 'PATCH'])
 def trip_detail(request, pk):
@@ -63,7 +106,7 @@ def trip_detail(request, pk):
 
     if request.method == 'GET':
         serializer = TripSerializer(trip)
-        return Response(serializer.data)
+        return Response(unique_users(serializer.data))
 
     elif request.method == 'PATCH':
         serializer = TripSerializer(trip, data=request.data)
@@ -81,5 +124,5 @@ def session_list(request):
     except User.DoesNotExist:
         return Response({'errors': {'title': 'user does not exist'}}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = UserSerializer(user)
-    return Response(serializer.data)
+    serializer = UserTripSerializer(user)
+    return Response(unique_trips(serializer.data))
