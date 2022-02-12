@@ -44,7 +44,7 @@ def user_list(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'errors': {'title': 'user could not be created'}}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def user_detail(request, pk):
@@ -54,7 +54,7 @@ def user_detail(request, pk):
     try:
         user = User.objects.get(pk=pk)
     except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'errors': {'title': 'user could not be found'}}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = UserTripSerializer(user)
@@ -62,9 +62,8 @@ def user_detail(request, pk):
 
 @api_view(['GET', 'POST'])
 def trip_list(request):
-    """
-    List all code trips, or create a new trip.
-    """
+    """ List all trips, or create a new trip. """
+
     if request.method == 'GET':
         trips = Trip.objects.all()
         serializer = TripSerializer(trips, many=True)
@@ -92,15 +91,18 @@ def trip_list(request):
             response_data = unique_users(response_data)
 
             return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'errors': {'title': 'trip could not be created'}}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PATCH', 'DELETE'])
 
+@api_view(['GET', 'PATCH'])
 def trip_detail(request, pk):
+    """ Get a single trip, or update an existing trip. """
+
     try:
         trip = Trip.objects.get(pk=pk)
-    except User.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    except Trip.DoesNotExist:
+        return Response({'errors': {'title': 'trip does not exist'}}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = TripSerializer(trip)
@@ -110,18 +112,17 @@ def trip_detail(request, pk):
         serializer = TripSerializer(trip, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(unique_users(serializer.data))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
+        return Response({'errors': {'title': 'trip could not be updated'}}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def session_list(request):
+    """ Create a new session for a user on login. """
+
     try:
         user = User.objects.get(email=request.data['email'])
     except User.DoesNotExist:
-        return Response(
-            {'errors': {'title': 'user does not exist'}},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'errors': {'title': 'user does not exist'}}, status=status.HTTP_404_NOT_FOUND)
 
     serializer = UserTripSerializer(user)
     return Response(unique_trips(serializer.data))
