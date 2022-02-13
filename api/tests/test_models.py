@@ -1,5 +1,5 @@
 from django.test import TestCase
-from api.models import User, Trip
+from api.models import User, Trip, TripUser
 from django.db.utils import IntegrityError
 
 class UserTests(TestCase):
@@ -39,3 +39,41 @@ class TripTests(TestCase):
         self.assertEqual(trip.created_by, 'test@example.com')
         self.assertEqual(trip.confirmed, False)
         self.assertEqual(trip.budget, 1000)
+
+    def test_trip_possible_dates(self):
+        user1= User.objects.create(name='user1', email='user1@example.com')
+        user2= User.objects.create(name='user2', email='user2@example.com')
+        user3= User.objects.create(name='user3', email='user3@example.com')
+
+        trip = Trip.objects.create(name='trip', created_by='user1@example.com', budget='1')
+
+        TripUser.objects.create(user_id=user1.id, trip_id=trip.id, start_date=1, end_date=10)
+        TripUser.objects.create(user_id=user1.id, trip_id=trip.id, start_date=20, end_date=30)
+
+        self.assertEqual(trip.possible_dates(), [
+            {
+                'start_date': 1,
+                'end_date': 10
+            },
+            {   'start_date': 20,
+                'end_date': 30
+            }
+        ])
+
+        TripUser.objects.create(user_id=user2.id, trip_id=trip.id, start_date=2, end_date=11)
+        TripUser.objects.create(user_id=user2.id, trip_id=trip.id, start_date=19, end_date=29)
+        TripUser.objects.create(user_id=user2.id, trip_id=trip.id, start_date=40, end_date=50)
+
+        self.assertEqual(trip.possible_dates(), [
+            {
+                'start_date': 2,
+                'end_date': 10
+            },
+            {   'start_date': 20,
+                'end_date': 29
+            }
+        ])
+
+        TripUser.objects.create(user_id=user3.id, trip_id=trip.id, start_date=100, end_date=101)
+
+        self.assertEqual(trip.possible_dates(), [])
