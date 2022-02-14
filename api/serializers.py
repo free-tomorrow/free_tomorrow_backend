@@ -29,8 +29,7 @@ class UserTripSerializer(serializers.ModelSerializer):
 
 class TripSerializer(serializers.ModelSerializer):
     users = UserSerializer(many = True, read_only = True)
-    trip_users = TripUserSerializer(many = True, read_only = True)
 
     class Meta:
         model = Trip
-        fields = ('id', 'name', 'created_by', 'budget', 'users', 'trip_users')
+        fields = ('id', 'name', 'created_by', 'budget', 'users')
