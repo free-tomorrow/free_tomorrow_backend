@@ -113,9 +113,22 @@ def trip_detail(request, pk):
         return Response(unique_users(serializer.data))
 
     elif request.method == 'PATCH':
-        serializer = TripSerializer(trip, data=request.data)
+        try:
+            serializer = TripSerializer(trip, data=request.data['trip_info'], partial=True)
+        except KeyError:
+            return Response({'errors': {'title': 'trip could not be updated'}}, status=status.HTTP_400_BAD_REQUEST)
+
         if serializer.is_valid():
             serializer.save()
+
+            try:
+                user = User.objects.get(pk=request.data['user_id'])
+            except User.DoesNotExist:
+                return Response({'errors': {'title': 'user could not be found'}}, status=status.HTTP_404_NOT_FOUND)
+
+            for date in request.data['dates']:
+                TripUser.objects.create(user=user, trip=trip, start_date = date['start_date'], end_date = date['end_date'])
+
             return Response(serializer.data)
         return Response({'errors': {'title': 'trip could not be updated'}}, status=status.HTTP_400_BAD_REQUEST)
 

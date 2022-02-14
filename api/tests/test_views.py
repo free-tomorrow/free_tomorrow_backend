@@ -132,19 +132,33 @@ class TripRequestTests(TestCase):
         self.assertEqual(response.data, {'errors': {'title': 'trip could not be created'}})
 
     def test_patch_trip_success(self):
+        user = User.objects.create(email='test@example.com', name='test')
         trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
-        params = {'name': 'Trip2', 'created_by': 'user', 'budget': 10}
-        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params, 'application/json')
-        serializer = TripSerializer(params)
+        params = {
+            'user_id': user.id,
+            'trip_info': {
+                'budget': 10
+            },
+            'dates': [
+                {
+                    'start_date': 1,
+                    'end_date': 2
+                },
+                {
+                    'start_date': 3,
+                    'end_date': 4
+                }
+            ]
+        }
+        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params,
+         'application/json')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['name'], serializer.data['name'])
-        self.assertEqual(response.data['created_by'], serializer.data['created_by'])
-        self.assertEqual(response.data['budget'], serializer.data['budget'])
-
-        self.assertEqual(response.data['name'], 'Trip2')
+        self.assertEqual(response.data['name'], 'Trip')
         self.assertEqual(response.data['created_by'], 'user')
-        self.assertEqual(response.data['budget'], 10)
+        self.assertEqual(response.data['budget'], params['trip_info']['budget'])
+
+        self.assertEqual(trip.possible_dates(), params['dates'])
 
     def test_patch_trip_failure(self):
         trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
