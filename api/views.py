@@ -109,8 +109,9 @@ def trip_detail(request, pk):
         return Response({'errors': {'title': 'trip does not exist'}}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = TripSerializer(trip)
-        return Response(unique_users(serializer.data))
+        response_data = TripSerializer(trip).data
+        response_data['possible_dates'] = trip.possible_dates()
+        return Response(unique_users(response_data))
 
     elif request.method == 'PATCH':
         try:

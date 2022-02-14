@@ -88,16 +88,18 @@ class TripRequestTests(TestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_get_trip_success(self):
+        user = User.objects.create(name='test', email='test@example.com')
         trip = self.create_trip('Trip1', 'test@example.com', 1000)
+        TripUser.objects.create(user=user, trip=trip, start_date=12345, end_date=67890)
         response = self.client.get(reverse(views.trip_detail, args=[trip.id]))
         serializer = TripSerializer(trip)
 
-        self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data['name'], trip.name)
         self.assertEqual(response.data['budget'], trip.budget)
         self.assertEqual(response.data['created_by'], 'test@example.com')
+        self.assertEqual(response.data['possible_dates'], [{'start_date': 12345, 'end_date': 67890}])
 
     def test_get_trip_failure(self):
         response = self.client.get(reverse(views.trip_detail, args=[999]))
@@ -105,24 +107,24 @@ class TripRequestTests(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.data, {'errors': {'title': 'trip does not exist'}})
 
-    # def test_post_trips_success(self):
-    #     user = User.objects.create(name='test', email='test@example.com')
-    #     params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'start_date': 1, 'end_date': 2, 'budget': 3}
-    #     response = self.client.post(reverse(views.trip_list), params, 'application/json')
-    #     serializer = TripSerializer(params['trip_info'])
+    def test_post_trips_success(self):
+        user = User.objects.create(name='test', email='test@example.com')
+        params = {'trip_info': {'name': 'Trip', 'created_by': user.email, 'budget': 1}, 'dates': [{'start_date': 1, 'end_date': 2}], 'budget': 3}
+        response = self.client.post(reverse(views.trip_list), params, 'application/json')
+        serializer = TripSerializer(params['trip_info'])
 
-    #     self.assertEqual(response.status_code, 201)
-    #     self.assertEqual(response.data['name'], serializer.data['name'])
-    #     self.assertEqual(response.data['created_by'], serializer.data['created_by'])
-    #     self.assertEqual(response.data['budget'], serializer.data['budget'])
-    #     self.assertEqual(response.data['name'], 'Trip')
-    #     self.assertEqual(response.data['created_by'], user.email)
-    #     self.assertEqual(response.data['budget'], 1)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['name'], serializer.data['name'])
+        self.assertEqual(response.data['created_by'], serializer.data['created_by'])
+        self.assertEqual(response.data['budget'], serializer.data['budget'])
+        self.assertEqual(response.data['name'], 'Trip')
+        self.assertEqual(response.data['created_by'], user.email)
+        self.assertEqual(response.data['budget'], 1)
 
-    #     trip = Trip.objects.get(pk=response.data['id'])
-    #     trip_user = trip.users.first()
+        trip = Trip.objects.get(pk=response.data['id'])
+        trip_user = trip.users.first()
 
-    #     self.assertEqual(user, trip_user)
+        self.assertEqual(user, trip_user)
 
     def test_post_trips_failure(self):
         params = {'trip_info': None }
