@@ -58,7 +58,13 @@ def user_detail(request, pk):
 
     if request.method == 'GET':
         serializer = UserTripSerializer(user)
-        return Response(unique_trips(serializer.data))
+        response_data = serializer.data
+
+        i = 0
+        for trip in user.trip_set.all():
+            response_data['trip_set'][i]['possible_dates'] = trip.possible_dates()
+            i += 1
+        return Response(unique_trips(response_data))
 
 @api_view(['GET', 'POST'])
 def trip_list(request):

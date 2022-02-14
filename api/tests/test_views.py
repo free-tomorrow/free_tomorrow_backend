@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from ..models import User, Trip
+from ..models import User, Trip, TripUser
 from ..serializers import UserSerializer, TripSerializer,  UserTripSerializer
 from .. import views
 
@@ -27,14 +27,16 @@ class UserRequestTests(TestCase):
 
     def test_get_user_success(self):
         user = self.create_user('test', 'test@example.com')
+        trip = Trip.objects.create(name='Disney', created_by='test@example.com', budget=1500)
+        TripUser.objects.create(user=user, trip=trip, start_date=1660881599999, end_date=1660981599999)
         response = self.client.get(reverse(views.user_detail, args=[user.id]))
-        serializer = UserTripSerializer(user)
 
-        self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data['email'], user.email)
         self.assertEqual(response.data['name'], user.name)
+
+        self.assertEqual(response.data['trip_set'][0]['possible_dates'], [{'start_date': 1660881599999, 'end_date': 1660981599999}])
 
     def test_get_user_failure(self):
         response = self.client.get(reverse(views.user_detail, args=[999]))
