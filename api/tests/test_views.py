@@ -88,16 +88,18 @@ class TripRequestTests(TestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_get_trip_success(self):
+        user = User.objects.create(name='test', email='test@example.com')
         trip = self.create_trip('Trip1', 'test@example.com', 1000)
+        TripUser.objects.create(user=user, trip=trip, start_date=12345, end_date=67890)
         response = self.client.get(reverse(views.trip_detail, args=[trip.id]))
         serializer = TripSerializer(trip)
 
-        self.assertEqual(response.data, serializer.data)
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(response.data['name'], trip.name)
         self.assertEqual(response.data['budget'], trip.budget)
         self.assertEqual(response.data['created_by'], 'test@example.com')
+        self.assertEqual(response.data['possible_dates'], [{'start_date': 12345, 'end_date': 67890}])
 
     def test_get_trip_failure(self):
         response = self.client.get(reverse(views.trip_detail, args=[999]))
