@@ -32,6 +32,10 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+ADMINS = [
+    ('Greg', 'gwhoisj@gmail.com')
+]
+
 ALLOWED_HOSTS = [
     '0.0.0.0',
     'localhost',
@@ -41,6 +45,7 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://freetomorrow.netlify.app',
 ]
 
 # Application definition
