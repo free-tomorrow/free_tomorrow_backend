@@ -11,11 +11,9 @@
 
 -------------------------------------------------------------------------------
 
-**WIP**
-
 Free Tomorrow is an app designed to help busy friends schedule a trip together. The backend repository is responsible for storing information about each user and their availability in a PostgreSQL database, exposing any required information about users or trips to the frontend, and performing the required logic to determine available dates for each invited user. Authentication is not currently supported, and users must simply provide a valid email address to create an account, or use an existing email address to log in.
 
-### Endpoints
+### Available Endpoints
 
 The base path to access the API is:
 
@@ -38,7 +36,15 @@ Example response:
         "id": 1,
         "name": "Bob",
         "email": "bob@example.com",
-        "trip_set": []
+        "trip_set": [
+            {
+                "name": "example trip",
+                "created_by": "bob@example.com",
+                "confirmed": false,
+                "budget": 1500
+            },
+            ...
+        ]
     },
     {
         "id": 2,
@@ -54,7 +60,7 @@ Example response:
 
 `GET /users/{id}`
 
-Returns a single user that matches the provided id. If there are no users that match the given id, a 404 status code and error message will be returned.
+Returns a single user that matches the provided id. If there are no users that match the given id, a 404 status code and error message will be returned. An array of possible dates is also returned for each trip in the user's trip set. Because this method is relatively resource-intensive, it is not included in trip sets when _all_ users are called, but it is included for single users here, as well as in single trips. Data is returned in Unix time format.
 
 Example response:
 ```
@@ -62,7 +68,24 @@ Example response:
     "id": 1,
     "name": "Bob",
     "email": "bob@example.com",
-    "trip_set": []
+    "trip_set": [
+        {
+            "name": "example trip",
+            "created_by": "bob@example.com",
+            "confirmed": false,
+            "budget": 1500,
+            "possible_dates": [
+                {
+                    "start_date": 1660881599999,
+                    "end_date": 1660981599999
+                },
+                {
+                    "start_date": 1760881599999,
+                    "end_date": 1860981599999
+                }
+            ]
+        }
+    ]
 }
 ```
 
@@ -104,7 +127,14 @@ Example response:
         "created_by": "Bob",
         "budget": 1500,
         "confirmed": true,
-        "users": []
+        "users": [
+            {
+                "id": 1,
+                "name": "Bob",
+                "email": "bob@example.com"
+            },
+            ...
+        ]
     },
     {
         "id": 2,
@@ -122,7 +152,7 @@ Example response:
 
 `GET /trips/{id}`
 
-Returns a single trip that matches the provided id. If there are no trips that match the given id, a 404 status code and error message will be returned.
+Returns a single trip that matches the provided id. If there are no trips that match the given id, a 404 status code and error message will be returned. Similarly to `GET /users/{id}`, this endpoint returns possible dates for a single trip, formatted in Unix time.
 
 Example response:
 ```
@@ -131,8 +161,24 @@ Example response:
     "name": "Disney",
     "created_by": "Bob",
     "budget": 1500,
-    "confirmed": true,
-    "users": []
+    "users": [
+        {
+            "id": 1,
+            "name": "Bob",
+            "email": "bob@example.com"
+        },
+        ...
+    ],
+    "possible_dates": [
+        {
+            "start_date": 1660881599999,
+            "end_date": 1660981599999
+        },
+        {
+            "start_date": 1760881599999,
+            "end_date": 1860981599999
+        }
+    ]
 }
 ```
 
@@ -143,10 +189,17 @@ POST /trips/
 Content-Type: application/json
 Accept: application/json
 {
-    "name": "Disney",
-    "created_by": "Bob",
-    "budget": 2000,
-    "confirmed": true
+    "trip_info": {
+        "name": "Disney",
+        "created_by": "Bob",
+        "budget": 2000
+    },
+    "dates": [
+        {
+            "start_date": 1660881599999,
+            "end_date": 1760881599999
+        }
+    ]
 }
 ```
 
@@ -157,9 +210,56 @@ Example response:
 {
     "id": 1,
     "name": "Disney",
-    "created_by": "Bob",
+    "created_by": "bob@example.com",
     "budget": 2000,
-    "confirmed": true,
-    "users": []
+    "users": [
+        {
+            "id": 1,
+            "name": "Bob",
+            "email": "bob@example.com"
+        }
+    ],
+    "dates": [
+        {
+            "start_date": 1660881599999,
+            "end_date": 1760881599999
+        }
+    ]
+}
+```
+
+#### Log in / Create a new session
+
+```
+POST /sessions/
+Content-Type: application/json
+Accept: application/json
+{
+    "email": "bob@example.com"
+}
+```
+
+Returns a 200 OK status code along with a user's id, name, and trip_set. **These trips do not include the possible_dates key**
+
+Example response:
+```
+{
+    "id": 1,
+    "name": "Bob",
+    "email": "bob@example.com",
+    "trip_set": [
+        {
+            "name": "cool trip",
+            "created_by": "bob@example.com",
+            "confirmed": false,
+            "budget": 1500
+        },
+        {
+            "name": "A really cool trip",
+            "created_by": "jim@comcast.net",
+            "confirmed": false,
+            "budget": 1500
+        }
+    ]
 }
 ```
