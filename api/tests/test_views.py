@@ -152,8 +152,7 @@ class TripRequestTests(TestCase):
                 }
             ]
         }
-        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params,
-         'application/json')
+        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params, 'application/json')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['name'], 'Trip')
@@ -169,6 +168,53 @@ class TripRequestTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data, {'errors': {'title': 'trip could not be updated'}})
+
+    def test_patch_trip_bad_request(self):
+        user = User.objects.create(email='test@example.com', name='test')
+        trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
+        params = {
+            'user_id': user.id,
+            'trip_info': {
+                'budget': 'abc'
+            },
+            'dates': [
+                {
+                    'start_date': 1,
+                    'end_date': 2
+                },
+                {
+                    'start_date': 3,
+                    'end_date': 4
+                }
+            ]
+        }
+        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params, 'application/json')
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data, {'errors': {'title': 'trip could not be updated'}})
+
+    def test_patch_trip_user_does_not_exist(self):
+        trip = Trip.objects.create(name='Trip', created_by='user', budget=1)
+        params = {
+            'user_id': 999,
+            'trip_info': {
+                'budget': 10
+            },
+            'dates': [
+                {
+                    'start_date': 1,
+                    'end_date': 2
+                },
+                {
+                    'start_date': 3,
+                    'end_date': 4
+                }
+            ]
+        }
+        response = self.client.patch(reverse(views.trip_detail, args=[trip.id]), params, 'application/json')
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.data, {'errors': {'title': 'user could not be found'}})
 
 class SessionRequestTests(TestCase):
     def test_post_session_success(self):
