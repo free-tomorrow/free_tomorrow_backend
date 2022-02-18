@@ -127,8 +127,11 @@ def trip_detail(request, pk):
             except User.DoesNotExist:
                 return Response({'errors': {'title': 'user could not be found'}}, status=status.HTTP_404_NOT_FOUND)
 
-            for date in request.data['dates']:
-                TripUser.objects.create(user=user, trip=trip, start_date = date['start_date'], end_date = date['end_date'])
+            if len(request.data['dates']) == 0:
+                return Response({'errors': {'title': 'no dates specified'}}, status=400)
+            else:
+                for date in request.data['dates']:
+                    TripUser.objects.create(user=user, trip=trip, start_date = date['start_date'], end_date = date['end_date'])
 
             return Response(serializer.data)
         return Response({'errors': {'title': 'trip could not be updated'}}, status=status.HTTP_400_BAD_REQUEST)
